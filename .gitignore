@@ -6,3 +6,4 @@
 *.pck
 res/*
 tags
+build

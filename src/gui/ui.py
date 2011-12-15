@@ -6,10 +6,13 @@ Defines main UI dialog.
 # own #
 from gui.params import *
 from pref.opt import __version__
+from alg.altogether import algs, random_int
+from db.kanji import Kanji
 
 # external #
-from PyQt4.QtGui import QWidget, QVBoxLayout, QGridLayout, \
-                        QGroupBox, QLabel, QPushButton, QApplication, QFont \
+from PyQt4.QtGui import QWidget, QGridLayout, \
+                        QGroupBox, QLabel, QPushButton, QApplication, QFont, \
+                        QComboBox
 
 from PyQt4.QtCore import Qt
 
@@ -18,7 +21,8 @@ class GUI(QWidget):
     def __init__(self, parent=None):
         super(GUI, self).__init__(parent)
 
-        self.layout = QVBoxLayout()
+        #self.layout = QVBoxLayout()
+        self.layout = QGridLayout()
 
         self.kanjiGroup = QGroupBox('Kanji by day, week, month, year')
         self.kanjiLayout = QGridLayout()
@@ -50,10 +54,12 @@ class GUI(QWidget):
         self.getAll = QPushButton('Get all')
         self.showStats = QPushButton('Stats')
         self.quitApp = QPushButton('Quit')
-        self.layout.addWidget(self.kanjiGroup)
-        self.layout.addWidget(self.getAll)
-        self.layout.addWidget(self.showStats)
-        self.layout.addWidget(self.quitApp)
+        self.methodCombo = QComboBox()
+        self.layout.addWidget(self.kanjiGroup, 0, 0, 1, 2)
+        self.layout.addWidget(self.getAll, 1, 0)
+        self.layout.addWidget(self.showStats, 1, 1)
+        self.layout.addWidget(self.methodCombo, 2, 0, 1, 2)
+        self.layout.addWidget(self.quitApp, 3, 0, 1, 2)
 
         self.setLayout(self.layout)
 
@@ -85,12 +91,26 @@ class GUI(QWidget):
         self.month.setFont(QFont(PRETTY_FONT, KANJI_SIZE))
         self.year.setFont(QFont(PRETTY_FONT, KANJI_SIZE))
 
+        self.methodCombo.addItems(algs.keys())
+        self.methodCombo.setCurrentIndex(0)
+
     def init_actions(self):
         self.quitApp.clicked.connect(self.close)
         self.getAll.clicked.connect(self.get_all)
 
     def get_all(self):
-        pass
+        kanji_set = []
+        while(len(kanji_set) != 4):
+            #integer = random_int(str(self.methodCombo.currentText()))
+            #print integer
+            #kanji = Kanji.get_random(integer)
+            kanji = Kanji.get_random(random_int(str(self.methodCombo.currentText())))
+            if kanji is not None:
+                kanji_set.append(kanji.character)
+        self.day.setText(kanji_set.pop())
+        self.week.setText(kanji_set.pop())
+        self.month.setText(kanji_set.pop())
+        self.year.setText(kanji_set.pop())
 
     def pretty_font(self):
         pass

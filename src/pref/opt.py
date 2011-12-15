@@ -17,7 +17,7 @@ links = {'frequency20k' : 'http://foosoft.net/japanese/frequency/downloads/repor
 auth = {'qrng' 	: {'login' 	: 'Xifax',
 				   'pass' 	: 'JQWOw735yvEN'},
 		## Quantum Random ~Bit~ Generator
-		'qrbg' 	: {'login' 	: 'Aster',
+		'qrbg' 	: {'login' 	: 'Xifax',
 				   'pass' 	: 'wirel0ss'},
 		}
 

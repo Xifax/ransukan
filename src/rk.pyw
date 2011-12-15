@@ -11,11 +11,15 @@ from PyQt4.QtGui import QApplication
 
 # own #
 from gui.ui import GUI
+from db.store import init_db
 
 def main():
     app = QApplication(sys.argv)
 
+    init_db()
+
     gui = GUI()
+    gui.get_all()
     gui.show()
 
     sys.exit(app.exec_())
