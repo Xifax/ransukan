@@ -24,8 +24,10 @@ auth = {'qrng' 	: {'login' 	: 'Xifax',
 # In case called from tools: should prepend additional ../
 paths = {'res' 			: '../res',
 		 'lib' 			: '../lib',
-		 'qrng' 		: '../lib/libQRNG/libQRNG.so',
 		 'freq_html' 	: '../res/frequency20k.html',
 		 'freq_db' 		: '../res/freq.db',
 		 'kanjidic' 	: '../res/kanjidic2.dblite',
 		 }
+
+# Libs to use
+libs = { 'qrng' 		: '../lib/libQRNG/libQRNG.so', }

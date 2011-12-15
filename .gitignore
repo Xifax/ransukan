@@ -1,6 +1,8 @@
+^.*
 *.class
 *.pyc
 *.pyo
 *.log
 *.pck
 res/*
+tags

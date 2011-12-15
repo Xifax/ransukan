@@ -14,3 +14,6 @@ class Kanji(Entity):
     character = Field(Unicode)
     frequency = Field(Integer)
     dominance = Field(Float)
+
+    def __repr__(self):
+        return u"Kanji: %s | %d" % (self.character, self.frequency)
