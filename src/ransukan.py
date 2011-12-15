@@ -1,4 +1,7 @@
 # -*- coding=utf-8 -*-
+"""
+Main application script.
+"""
 
 # internal #
 import sys
