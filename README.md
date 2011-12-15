@@ -19,7 +19,7 @@ or
 Notes: 
 
 * Requires **Python** 2.7
-* Require **PyQt** 4.8
+* Requires **PyQt** 4.8
 * All other required modules should be installed using *install.py*. In case something fails to, here's full list:
 	* Elixir (requires sqlalchemy)
 	* BeautifulSoup
