@@ -39,6 +39,9 @@ class QuantumRNG:
         if(self.session):
             return 0.0
 
+    def active(self):
+        return self.session
+
     def __del__(self):
         self.lib.qrng_disconnect()
 

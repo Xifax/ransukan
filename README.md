@@ -24,6 +24,7 @@ Notes:
 	* Elixir (requires sqlalchemy)
 	* BeautifulSoup
 	* matplotlib (requires numpy)
+* All required resources will be downloaded by install script. In case of failure or update necessitiy, run *prepare.py*
 
 ---
 

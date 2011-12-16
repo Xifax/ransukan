@@ -58,14 +58,16 @@ class RandomMess:
         return self.qrbg.getShort()
 
     def random_qrNumberG(self, floating = False):
-        if self.qrng is None:
+        if self.qrng is None or not self.qrng.active():
             raise MessedUpException("Not authorized on QR-NUMBER-G service!")
-        return self.qrng.getInt()
+        result = self.qrng.getInt()
+        if result is not None:
+            return result.value
 
     # Algorithms names and corresponding methods
     algs = {'Quantum Random Number Generator' : random_qrNumberG,
             'Quantum Random Bit Generator'    : random_qrBitG,
             'Random.org'                      : random_org,
-            'GNU Scientific Library'          : random_gsl,
+            #'GNU Scientific Library'          : random_gsl,
             'Numpy random sampling'           : random_numpy,
             }

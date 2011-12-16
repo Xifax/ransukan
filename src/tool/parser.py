@@ -43,6 +43,8 @@ def parse_freq_html(file_path):
                     picked=0)
     update_db()
 
-
 def create_freq_db(file_path):
+    """
+    Create or initialize specified DB file.
+    """
     init_db(file_path)
