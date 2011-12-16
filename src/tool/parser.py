@@ -39,7 +39,8 @@ def parse_freq_html(file_path):
             Kanji(  rank=cols[0].string,
                     character=cols[1].a.string,
                     frequency=cols[2].string,
-                    dominance=cols[3].string[:-1])
+                    dominance=cols[3].string[:-1],
+                    picked=0)
     update_db()
 
 

@@ -26,13 +26,16 @@ class QuantumRNG:
             auth['qrng']['pass']) == 0):
             self.session = True
 
-    def int(self):
+    def getShort(self):
+        pass
+
+    def getInt(self):
         if(self.session):
             int_p = pointer(c_long(0))
             self.lib.qrng_get_int(int_p)
             return int_p.contents
 
-    def double(self):
+    def getDouble(self):
         if(self.session):
             return 0.0
 
