@@ -95,14 +95,14 @@ class GUI(QWidget):
 
         # Main layout
         # DB controls (top)
-        self.showDB = QPushButton('Change DB (active:)')
+        self.showDB = QPushButton('&Change DB (active:)')
         self.availableDB = QComboBox()
-        self.changeDB = QPushButton('Remap')
+        self.changeDB = QPushButton('&Remap')
         # General controls (bottom)
-        self.getAll = QPushButton('Get all')
-        self.showStats = QPushButton('Stats')
-        self.quitApp = QPushButton('Quit')
-        self.authGen = QPushButton('Auth')
+        self.getAll = QPushButton('&Get all')
+        self.showStats = QPushButton('&Stats')
+        self.quitApp = QPushButton('&Quit')
+        self.authGen = QPushButton('&Auth')
         self.methodCombo = QComboBox()
         # Notifications
         self.progressBar = QProgressBar()
@@ -133,7 +133,7 @@ class GUI(QWidget):
         self.auth_thread = None
         self.init_backend()
         choose_db(str(self.availableDB.currentText()))
-        self.showDB.setText("Choose DB (active: %s)" % self.availableDB.currentText())
+        self.showDB.setText("&Change DB (active: %s)" % self.availableDB.currentText())
 
     def init_composition(self):
         self.setWindowTitle(NAME + ' ' + __version__)
@@ -208,7 +208,7 @@ class GUI(QWidget):
             self.availableDB.hide()
             self.changeDB.hide()
             self.show_message_then_hide("DB successfully remaped!", False)
-            self.showDB.setText("Choose DB (active: %s)" % self.availableDB.currentText())
+            self.showDB.setText("&Change DB (active: %s)" % self.availableDB.currentText())
         except NoDbException as e:
             self.show_message_then_hide(e.message)
 
