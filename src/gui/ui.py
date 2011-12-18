@@ -138,7 +138,7 @@ class GUI(QWidget):
     def init_composition(self):
         self.setWindowTitle(NAME + ' ' + __version__)
         desktop = QApplication.desktop()
-        self.setGeometry((desktop.width() - WIDTH)/2, \
+        self.setGeometry((desktop.width() - WIDTH)/2,
                         (desktop.height() - HEIGHT)/2, WIDTH, HEIGHT)
 
     def init_contents(self):
@@ -215,7 +215,7 @@ class GUI(QWidget):
     def get_all(self):
         try:
             kanji_set = []
-            while(len(kanji_set) != 4):
+            while len(kanji_set) != 4:
                 kanji = Kanji.get_random(self.al.random_int())
                 if kanji is not None:
                     # Should not get the same kanji in one set
@@ -255,7 +255,9 @@ class GUI(QWidget):
     def auth_task(self):
         self.auth_thread = AuthorizationTask(self.al)
         self.auth_thread.done.connect(self.auth_complete)
-        self.auth_thread.start()
+        self.auth_thread.run()
+        # IT DOESN't work on windows!
+#        self.auth_thread.start()
         self.show_progress('Authorizing on RNG services...')
 
     def auth_complete(self, success):
@@ -292,7 +294,6 @@ class GUI(QWidget):
     def hide_progress(self):
         self.progressBar.hide()
 
-
 class AuthorizationTask(QThread):
     done = pyqtSignal(bool)
 
@@ -306,6 +307,7 @@ class AuthorizationTask(QThread):
             self.al.auth()
             self.success = True
         except Exception as e:
+#            print e.message
             pass
 
         self.done.emit(self.success)

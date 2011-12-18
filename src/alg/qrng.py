@@ -30,18 +30,19 @@ class QuantumRNG:
         pass
 
     def getInt(self):
-        if(self.session):
+        if self.session:
             int_p = pointer(c_long(0))
             self.lib.qrng_get_int(int_p)
             return int_p.contents
 
     def getDouble(self):
-        if(self.session):
+        if self.session:
             return 0.0
 
     def active(self):
         return self.session
 
     def __del__(self):
-        self.lib.qrng_disconnect()
+        if self.lib is not None:
+            self.lib.qrng_disconnect()
 

@@ -18,7 +18,7 @@ def do_prepare():
             if not os.path.exists(freq_path):
                 download_freq_html(links[freq], freqs[freq])
             # 2. create/initialize appropriate kanji database
-            print "(Re)Initializing database %s. " % \
+            print "(Re)Initializing database %s " % \
                     db_for_freq[freq]
             create_freq_db(db_for_freq[freq])
             # 3. let's parse downloaded html and save all the neat stuff to our db

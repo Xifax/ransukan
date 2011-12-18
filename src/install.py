@@ -41,8 +41,8 @@ def install_with_easyinstall(package):
             problematic.append(package)
 
 def install_info():
-    print 'Installation complete.\n\nInstalled: %s, (total: %d) \
-    \n\nIn system: %s, (total: %d)  \n\nErred: %s, (total: %d)' \
+    print 'Installation complete.\n\nInstalled: %s (total: %d) \
+    \n\nIn system: %s (total: %d)  \n\nErred: %s (total: %d)' \
     % ('\n'.join(installed), len(installed),
         '\n'.join(in_system), len(in_system),
         '\n'.join(problematic), len(problematic))
