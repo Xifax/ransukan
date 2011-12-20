@@ -7,7 +7,7 @@ Should be imported only when those are required.
 __author__ 	= "Artiom Basenko"
 __license__ = "GPL"
 __status__ 	= "Development"
-__version__ = "0.3"
+__version__ = "0.4"
 
 # Web resources
 # todo: add the other

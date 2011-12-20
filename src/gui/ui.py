@@ -277,9 +277,9 @@ class GUI(QWidget):
     def auth_task(self):
         self.auth_thread = AuthorizationTask(self.al)
         self.auth_thread.done.connect(self.auth_complete)
-        self.auth_thread.run()
+        #self.auth_thread.run()
         # IT DOESN't work on windows!
-#        self.auth_thread.start()
+        self.auth_thread.start()
         self.show_progress('Authorizing on RNG services...')
 
     def auth_complete(self, success):

@@ -60,7 +60,7 @@ class MplCanvas(FigureCanvas):
 
 class MplWidget(QtGui.QWidget):
     """Widget defined in Qt Designer"""
-    def __init__(self, tools, toolbar=True, menu=True, parent=None):
+    def __init__(self, toolbar=True, menu=True, parent=None):
         # initialization of Qt MainWindow widget
         QtGui.QWidget.__init__(self, parent)
         # set the canvas to the Matplotlib widget
@@ -69,8 +69,6 @@ class MplWidget(QtGui.QWidget):
         self.layout = QtGui.QVBoxLayout()
         # add mpl widget to layout
         self.layout.addWidget(self.canvas)
-        # reference to toolsFrame
-        self.tool = tools
 
         if toolbar:
             # add navigation toolbar to layout
@@ -109,20 +107,20 @@ class MplWidget(QtGui.QWidget):
 
     def initActions(self):
         # toolbar
-        self.toggleLegendAction = QtGui.QAction(QtGui.QIcon(RES + ICONS + LEGEND), 'Toggle legend',
-                                     self, triggered=self.toggleLegend)
-        self.toggleLegendAction.setCheckable(True)
-        if self.toolbar is not None:
-            self.toolbar.addAction(self.toggleLegendAction)
+        #self.toggleLegendAction = QtGui.QAction(QtGui.QIcon(RES + ICONS + LEGEND), 'Toggle legend',
+                                     #self, triggered=self.toggleLegend)
+        #self.toggleLegendAction.setCheckable(True)
+        #if self.toolbar is not None:
+            #self.toolbar.addAction(self.toggleLegendAction)
 
         # context menu
         self.addAction(self.toggleLegendAction)
-        self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + COPY),'Copy data to table',
-                                     self, triggered=self.toTable))
-        self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + GRAPH),'Plot data in tools',
-                                     self, triggered=self.toGraphTool))
-        self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + SCALE), 'Autoscale',
-                                     self, triggered=self.updateScale))
+        #self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + COPY),'Copy data to table',
+                                     #self, triggered=self.toTable))
+        #self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + GRAPH),'Plot data in tools',
+                                     #self, triggered=self.toGraphTool))
+        #self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + SCALE), 'Autoscale',
+                                     #self, triggered=self.updateScale))
 
         self.alwaysAutoScale = QtGui.QAction('Scale on update', self)
         self.alwaysAutoScale.setCheckable(True)
@@ -140,11 +138,11 @@ class MplWidget(QtGui.QWidget):
     def newIcons(self):
         for position in range(0, self.toolbar.layout().count()):
             widget = self.toolbar.layout().itemAt(position).widget()
-            if isinstance(widget, QtGui.QToolButton):
-                icon = QtGui.QIcon(RES + ICONS + TOOLBAR_ICONS[position])
-                self.toolbar.layout().itemAt(position).widget().setIcon(icon)
+            #if isinstance(widget, QtGui.QToolButton):
+                #icon = QtGui.QIcon(RES + ICONS + TOOLBAR_ICONS[position])
+                #self.toolbar.layout().itemAt(position).widget().setIcon(icon)
 
-        self.toolbar.setIconSize(QSize(ICO_GRAPH, ICO_GRAPH))
+        #self.toolbar.setIconSize(QSize(ICO_GRAPH, ICO_GRAPH))
 
     def resetGraphicEffect(self):
         if self.graphicsEffect() is not None:
@@ -391,39 +389,39 @@ class MplWidget(QtGui.QWidget):
         except Exception, e:
             pass
 
-    def saveFigure(self, name='figure', format='png', transparency=False):
-        if format == 'bmp':
-            self.canvas.fig.savefig(RES + TEMP + name + '.png', transparent=transparency)
+    #def saveFigure(self, name='figure', format='png', transparency=False):
+        #if format == 'bmp':
+            #self.canvas.fig.savefig(RES + TEMP + name + '.png', transparent=transparency)
 
-            img = Image.open(RES + TEMP + name + '.png')
-            img.load()
-            if len(img.split()) == 4:
-                r, g, b, a = img.split()
-                img = Image.merge('RGB', (r, g, b))
-            img.save(RES + TEMP + name + '.bmp')
-            os.unlink(RES + TEMP + name + '.png')
-        else:
-            self.canvas.fig.savefig(RES + TEMP + name + '.' + format, transparent=transparency)
+            #img = Image.open(RES + TEMP + name + '.png')
+            #img.load()
+            #if len(img.split()) == 4:
+                #r, g, b, a = img.split()
+                #img = Image.merge('RGB', (r, g, b))
+            #img.save(RES + TEMP + name + '.bmp')
+            #os.unlink(RES + TEMP + name + '.png')
+        #else:
+            #self.canvas.fig.savefig(RES + TEMP + name + '.' + format, transparent=transparency)
 
     #------------------ utils ------------------#
     ## Generates previews for specified data.
     #  @param data List of arrays.
-    @staticmethod
-    def generatePreviews(data):
-        # if data is of array type, it's preferable to use .any()
-        if len(data) > 0:
-            # temp folder
-            tmp = RES + TEMP
-            # prepare folder
-            if not os.path.exists(tmp):
-                os.makedirs(tmp)
-            # clear temp folder contents
-            clearFolderContents(tmp)
+    #@staticmethod
+    #def generatePreviews(data):
+        ## if data is of array type, it's preferable to use .any()
+        #if len(data) > 0:
+            ## temp folder
+            #tmp = RES + TEMP
+            ## prepare folder
+            #if not os.path.exists(tmp):
+                #os.makedirs(tmp)
+            ## clear temp folder contents
+            #clearFolderContents(tmp)
 
-            level = 0
-            for array in data:
-                matplotlib.pyplot.figure(figsize=(6, 3))
-                matplotlib.pyplot.axis('off')
-                matplotlib.pyplot.plot(array, color='w', linewidth=LINE_WITH)
-                matplotlib.pyplot.savefig(RES + TEMP + str(level) + '.png', transparent=True)
-                level += 1
+            #level = 0
+            #for array in data:
+                #matplotlib.pyplot.figure(figsize=(6, 3))
+                #matplotlib.pyplot.axis('off')
+                #matplotlib.pyplot.plot(array, color='w', linewidth=LINE_WITH)
+                #matplotlib.pyplot.savefig(RES + TEMP + str(level) + '.png', transparent=True)
+                #level += 1
