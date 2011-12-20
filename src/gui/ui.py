@@ -7,17 +7,18 @@ Defines main UI dialog.
 from gui.params import KANJI, NAME, WIDTH, HEIGHT, \
                        PRETTY_FONT, KANJI_SIZE, \
                        MESSAGE_HEIGHT, MESSAGE_TIMEOUT, \
-                       PROGRESS_HEIGHT
+                       PROGRESS_HEIGHT, TOOLTIP_FONT_SIZE
 from pref.opt import __version__, dbs
 from alg.altogether import RandomMess, MessedUpException
 from db.kanji import Kanji
+from db.jdic import JDIC
 from db.store import choose_db, NoDbException
 from gui.stats import StatsUI
 
 # external #
 from PyQt4.QtGui import QWidget, QGridLayout, \
                         QGroupBox, QLabel, QPushButton, QApplication, QFont, \
-                        QComboBox, QProgressBar
+                        QComboBox, QProgressBar, QToolTip
 
 from PyQt4.QtCore import Qt, QObject, QEvent, QTimer, QThread, pyqtSignal, QSize
 
@@ -54,11 +55,15 @@ class LabelEventFilter(QObject):
                     elif object is parent_up(object).year:
                         parent_up(object).yearLabel.setText('Year: ' + str(kanji.frequency) + ' | '
                                                 + str(kanji.dominance) + '%')
+                    parent_up(object).kanji_tooltip(object)
                 except MessedUpException as e:
                     parent_up(object).show_message_then_hide(e.message)
             elif event.button() == Qt.RightButton:
-                # todo: statistics?
-                pass
+                found = JDIC.search(object.text())
+                if found:
+                    parent_up(object).toggle_kanji_info(object, found)
+                else:
+                    parent_up(object).show_message_then_hide('No such kanji in kanjidic2!')
         return False
 
 class GUI(QWidget):
@@ -178,6 +183,8 @@ class GUI(QWidget):
         self.progressBar.setMaximumHeight(PROGRESS_HEIGHT)
         self.progressBar.hide()
 
+        QToolTip.setFont(QFont(PRETTY_FONT, TOOLTIP_FONT_SIZE))
+
     def init_actions(self):
         self.showDB.clicked.connect(self.show_available_db)
         self.changeDB.clicked.connect(self.change_db)
@@ -249,6 +256,11 @@ class GUI(QWidget):
             self.year.setText(for_a_year.character)
             self.yearLabel.setText('Year: ' + str(for_a_year.frequency) + ' | '
                                         + str(for_a_year.dominance) + '%')
+
+            self.kanji_tooltip(self.day)
+            self.kanji_tooltip(self.week)
+            self.kanji_tooltip(self.month)
+            self.kanji_tooltip(self.year)
         except MessedUpException as e:
             self.show_message_then_hide(e.message)
 
@@ -303,6 +315,19 @@ class GUI(QWidget):
 
     def hide_progress(self):
         self.progressBar.hide()
+
+    def toggle_kanji_info(self, label, info):
+        label.setToolTip(info.info())
+
+    def kanji_tooltip(self, label):
+        found = JDIC.search(label.text())
+        if found:
+            label.setToolTip(found.info())
+        else:
+            label.setToolTip('No such kanji in kanjidic2!')
+
+    def kanji_info(self, kanji):
+        pass
 
         #### Utility events ####
 

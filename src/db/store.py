@@ -9,8 +9,8 @@ from elixir import metadata, create_all, setup_all, session
 
 from pref.opt import paths, dbs
 
-# Currently mapped db
-active_db = next(dbs.itervalues())
+# Currently mapped db (name)
+active_db = next(dbs.iterkeys())
 
 class NoDbException(Exception):
     pass
@@ -42,3 +42,9 @@ def choose_db(db):
         active_db = db
     else:
         raise NoDbException("Specified db does not exist!")
+
+def restore():
+    """
+    Remap previously active db.
+    """
+    init_db(dbs[active_db])
