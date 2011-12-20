@@ -12,13 +12,14 @@ from pref.opt import __version__, dbs
 from alg.altogether import RandomMess, MessedUpException
 from db.kanji import Kanji
 from db.store import choose_db, NoDbException
+from gui.stats import StatsUI
 
 # external #
 from PyQt4.QtGui import QWidget, QGridLayout, \
                         QGroupBox, QLabel, QPushButton, QApplication, QFont, \
                         QComboBox, QProgressBar
 
-from PyQt4.QtCore import Qt, QObject, QEvent, QTimer, QThread, pyqtSignal
+from PyQt4.QtCore import Qt, QObject, QEvent, QTimer, QThread, pyqtSignal, QSize
 
 def parent_up(object):
     if isinstance(object, QObject):
@@ -129,6 +130,7 @@ class GUI(QWidget):
         self.init_actions()
 
         # Let's initialize even some stuff!
+        self.stats = StatsUI(self)
         self.al = None
         self.auth_thread = None
         self.init_backend()
@@ -138,7 +140,7 @@ class GUI(QWidget):
     def init_composition(self):
         self.setWindowTitle(NAME + ' ' + __version__)
         desktop = QApplication.desktop()
-        self.setGeometry((desktop.width() - WIDTH)/2, \
+        self.setGeometry((desktop.width() - WIDTH)/2,
                         (desktop.height() - HEIGHT)/2, WIDTH, HEIGHT)
 
     def init_contents(self):
@@ -179,9 +181,11 @@ class GUI(QWidget):
     def init_actions(self):
         self.showDB.clicked.connect(self.show_available_db)
         self.changeDB.clicked.connect(self.change_db)
+
         self.quitApp.clicked.connect(self.close)
         self.getAll.clicked.connect(self.get_all)
         self.authGen.clicked.connect(self.auth_task)
+        self.showStats.clicked.connect(self.show_stats)
         self.methodCombo.currentIndexChanged.connect(self.update_alg)
 
         # Mouse events for labels
@@ -193,6 +197,12 @@ class GUI(QWidget):
         self.week.installEventFilter(self.eFilter)
         self.month.installEventFilter(self.eFilter)
         self.year.installEventFilter(self.eFilter)
+
+    def show_stats(self):
+        if self.stats.isVisible():
+            self.stats.hide()
+        else:
+            self.stats.show()
 
     def show_available_db(self):
         if self.availableDB.isVisible():
@@ -215,7 +225,7 @@ class GUI(QWidget):
     def get_all(self):
         try:
             kanji_set = []
-            while(len(kanji_set) != 4):
+            while len(kanji_set) != 4:
                 kanji = Kanji.get_random(self.al.random_int())
                 if kanji is not None:
                     # Should not get the same kanji in one set
@@ -255,7 +265,9 @@ class GUI(QWidget):
     def auth_task(self):
         self.auth_thread = AuthorizationTask(self.al)
         self.auth_thread.done.connect(self.auth_complete)
-        self.auth_thread.start()
+        self.auth_thread.run()
+        # IT DOESN't work on windows!
+#        self.auth_thread.start()
         self.show_progress('Authorizing on RNG services...')
 
     def auth_complete(self, success):
@@ -292,6 +304,21 @@ class GUI(QWidget):
     def hide_progress(self):
         self.progressBar.hide()
 
+        #### Utility events ####
+
+    def resizeEvent(self, QResizeEvent):
+        self.updateStatsPosition()
+        self.updateStatsSize()
+
+    def moveEvent(self, QMoveEvent):
+        self.updateStatsPosition()
+        self.updateStatsSize()
+
+    def updateStatsPosition(self):
+        self.stats.move(self.x() + self.width() + 20, self.y())
+
+    def updateStatsSize(self):
+        self.stats.resize(QSize(self.stats.width(), self.height()))
 
 class AuthorizationTask(QThread):
     done = pyqtSignal(bool)
@@ -306,6 +333,7 @@ class AuthorizationTask(QThread):
             self.al.auth()
             self.success = True
         except Exception as e:
+#            print e.message
             pass
 
         self.done.emit(self.success)

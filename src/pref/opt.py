@@ -64,4 +64,4 @@ db_for_freq = {'frequency20k'  : '../res/freq20k.db',
               }
 
 # Packages to install
-packages = ['sqlalchemy', 'elixir', 'BeautifulSoup', 'numpy', 'matplotlib', 'PyQt']
+packages = ['sqlalchemy', 'elixir', 'BeautifulSoup', 'numpy', 'matplotlib', 'PyQt4']

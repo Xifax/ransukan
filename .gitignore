@@ -8,3 +8,5 @@ tags
 build
 .ropeproject
 backup
+*.db
+*.html
