@@ -4,7 +4,7 @@ Describes abstractions for kanjidic2.
 Note, that jdic2 contains (only) 13K+ unique kanji.
 """
 
-from elixir import Entity, Field, Integer, Unicode
+from elixir import Entity, Field, Integer, Unicode, using_options
 
 class KanjiInJDIC(Entity):
     """
@@ -12,7 +12,8 @@ class KanjiInJDIC(Entity):
     Includes kanji itself, grade, frequency, readings and meaning.
     """
 
-    id = Field(Integer)
+    using_options(tablename="kanji")
+    _id = Field(Integer, colname="id", primary_key=True)
     literal = Field(Unicode)
     grade = Field(Integer)
     freq = Field(Integer)
