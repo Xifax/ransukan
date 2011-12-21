@@ -86,7 +86,7 @@ will prefer this param over total number of tests')
     ##### actions #####
 
     def refresh_plot(self):
-        #todo: how about 2d contour
+        #todo: how about 2d/3d contour, eh?
         self.statPlot.kanjiStats(Kanji.freq_stats())
         self.update_stat_info()
 
@@ -120,7 +120,7 @@ will prefer this param over total number of tests')
             count, (picked, freqs), picked_count = \
                 Kanji.query.count(), Kanji.freq_stats(), Kanji.picked_count()
             self.statInfo.setText("Kanji in DB: <b>%d</b> | Max picked: <b>%d</b> | \
-Max frequency: <b>%d</b> | Picked more than once: <b>%d</b>" %
+Max frequency: <b>%d</b> | Picked at least once: <b>%d</b>" %
                     (count, max(picked), max(freqs), picked_count))
             self.update()
         except ValueError:
@@ -141,6 +141,7 @@ Max frequency: <b>%d</b> | Picked more than once: <b>%d</b>" %
         if over:
             self.testProgress.hide()
             self.update_stat_info()
+            self.refresh_plot()
             self.beginTest.setEnabled(True)
             self.testProgress.setValue(0)
 

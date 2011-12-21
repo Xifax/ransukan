@@ -7,7 +7,7 @@ Should be imported only when those are required.
 __author__ 	= "Artiom Basenko"
 __license__ = "GPL"
 __status__ 	= "Development"
-__version__ = "0.6"
+__version__ = "0.7"
 
 app_name = u'乱数漢 ~ransukan~'
 
