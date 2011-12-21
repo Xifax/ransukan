@@ -160,12 +160,14 @@ class GUI(QWidget):
         Additional procedures run on application start.
         """
         # Let's initialize even some stuff!
-        self.stats = StatsUI(self)
         self.al = None
         self.auth_thread = None
         self.init_backend()
+
         choose_db(str(self.availableDB.currentText()))
         self.showDB.setText("&Change DB (active: %s)" % self.availableDB.currentText())
+
+        self.stats = StatsUI(self.al, self)
 
     def init_composition(self):
         """
@@ -437,7 +439,7 @@ class RandomNumberTask(QThread):
     """
     number = pyqtSignal(int)
 
-    def __init__(self, al, praent=None):
+    def __init__(self, al, parent=None):
         super(RandomNumberTask, self).__init__(parent)
         self.al = al
         self.result = None

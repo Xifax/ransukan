@@ -4,7 +4,7 @@ Kanji selection statistics UI dialog.
 """
 
 # external #
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QThread, pyqtSignal
 from PyQt4.QtGui import QWidget, QGridLayout, QPushButton, \
                         QLabel, QProgressBar, QSpinBox
 #import numpy as np
@@ -15,7 +15,7 @@ from db.kanji import Kanji
 from gui.params import PLOT_WIDTH
 
 class StatsUI(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, al, parent=None):
         super(StatsUI, self).__init__(parent)
 
         self.create_ui_components()
@@ -23,6 +23,8 @@ class StatsUI(QWidget):
         self.init_composition()
         self.init_components()
         self.init_actions()
+
+        self.al = al
 
     def create_ui_components(self):
         self.layout = QGridLayout()
@@ -32,7 +34,7 @@ class StatsUI(QWidget):
         self.switchFreqDom, self.statInfo, self.testNumber,
         self.targetMaxPicked, self.beginTest, self.testProgress) = \
         (QPushButton('&Refresh'), QPushButton('&Test'), QPushButton('&Clear'),
-        QPushButton('&Switch'), QLabel(''), QSpinBox(), QSpinBox(), QPushButton('&Go!'),
+        QPushButton('&Switch'), QLabel(''), QSpinBox(), QSpinBox(), QPushButton('Go!'),
         QProgressBar())
 
     def compose_ui(self):
@@ -67,51 +69,40 @@ n_picked(frequency) or n_picked(dominance)')
         self.beginTest.hide()
         self.testProgress.hide()
 
+        self.testNumber.setRange(10, 100000)
+        self.testNumber.setToolTip('Number of tests to perform')
+        self.targetMaxPicked.setRange(1, 1000)
+        self.targetMaxPicked.setToolTip('Target average times picked: if > 1, \
+will prefer this param over total number of tests')
+
     def init_actions(self):
         self.refreshPlot.clicked.connect(self.refresh_plot)
         self.clearStats.clicked.connect(self.reset_stats)
         self.runTest.clicked.connect(self.batch_test)
         self.switchFreqDom.clicked.connect(self.switch_freq_dom)
 
+        self.beginTest.clicked.connect(self.begin_test)
+
     ##### actions #####
 
     def refresh_plot(self):
+        #todo: how about 2d contour
         self.statPlot.kanjiStats(Kanji.freq_stats())
         self.update_stat_info()
-        #self.statPlot.clearCanvas()
-        #picked, freqs = Kanji.freq_stats()
-        ##print max(picked), max(freqs)
-        ##self.statPlot.canvas.ax.hist(picked, freqs, histtype='bar')
-        ##self.statPlot.canvas.ax.hist(picked, 50, histtype='bar')
-
-        ##hist, bins = np.histogram(picked, bins=100)
-        ## will lag
-        ##self.statPlot.canvas.ax.bar(freqs, picked)
-        #self.statPlot.canvas.ax.plot(freqs, picked)
-
-        #self.statPlot.canvas.ax.set_xlabel('Frequency')
-        #self.statPlot.canvas.ax.set_ylabel('Number of times picked')
-        #self.statPlot.canvas.ax.set_title('Distribution of (pseudo)randomly selected kanji')
-        ##self.statPlot.canvas.ax.text(max(freqs)/2, max(picked),
-                                    ##"""This distribution illustrates how much times (max %d)
-                                    ##kanji with different frequencies (max %d) has been picked"""
-                                    ##% (max(picked), max(freqs)), bbox=dict(facecolor='blue', alpha=0.1))
-        #self.statPlot.canvas.ax.grid(True)
-        #self.statPlot.canvas.ax.fill_between(freqs, picked, 1,
-                                            #facecolor='blue', alpha=0.5)
-        #self.statPlot.canvas.draw()
 
     def batch_test(self):
         if self.beginTest.isVisible():
             self.testNumber.hide()
             self.targetMaxPicked.hide()
             self.beginTest.hide()
-            self.testProgress.hide()
+            if self.testProgress.value() == 0:
+                self.testProgress.hide()
         else:
             self.testNumber.show()
             self.targetMaxPicked.show()
             self.beginTest.show()
-            #self.testProgress.show()
+            if self.testProgress.value() != 0:
+                self.testProgress.show()
 
     def reset_stats(self):
         Kanji.reset_stats()
@@ -133,4 +124,54 @@ Max frequency: <b>%d</b> | Picked more than once: <b>%d</b>" %
                     (count, max(picked), max(freqs), picked_count))
             self.update()
         except ValueError:
-            pass
+            set.statInfo.setText("No data available yet!")
+
+    def begin_test(self):
+        self.test_thread = BatchTestTask(self.al, self.testNumber.value(),
+                                         self.targetMaxPicked.value())
+        self.test_thread.over.connect(self.end_test)
+        self.test_thread.partDone.connect(self.progress_test)
+        self.testProgress.setValue(0)
+        self.testProgress.show()
+        self.test_thread.start()
+        self.beginTest.setEnabled(False)
+        #self.show_progress('Authorizing on RNG services...')
+
+    def end_test(self, over):
+        if over:
+            self.testProgress.hide()
+            self.update_stat_info()
+            self.beginTest.setEnabled(True)
+            self.testProgress.setValue(0)
+
+    def progress_test(self, partDone):
+        self.testProgress.setValue(partDone)
+        #self.update_stat_info()
+
+class BatchTestTask(QThread):
+    """
+    Perform series of kanji selection tests.
+    """
+    over = pyqtSignal(bool)
+    partDone = pyqtSignal(int)
+
+    def __init__(self, al, limit, rank, parent=None):
+        super(BatchTestTask, self).__init__(parent)
+        self.al = al
+        self.limit = limit
+        self.rank = rank
+
+    def run(self):
+        try:
+            for test in range(1, self.limit):
+                kanji_set = []
+                while len(kanji_set) != 4:
+                    kanji = Kanji.get_random(self.al.random_int())
+                    if kanji is not None:
+                        if kanji not in kanji_set:
+                            kanji_set.append(kanji)
+                self.partDone.emit(float(test)/self.limit * 100)
+        except Exception as e:
+            print e.message
+
+        self.over.emit(True)
