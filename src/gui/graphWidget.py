@@ -150,6 +150,28 @@ class MplWidget(QtGui.QWidget):
 
     #------------- plotting methods ---------------#
 
+    def histogram(self, data):
+        pass
+
+    def kanjiStats(self, data):
+        self.clearCanvas()
+        picked, freqs = data
+        # will lag
+        #self.statPlot.canvas.ax.bar(freqs, picked)
+        self.canvas.ax.plot(freqs, picked)
+
+        self.canvas.ax.set_xlabel('Frequency')
+        self.canvas.ax.set_ylabel('Number of times picked')
+        self.canvas.ax.set_title('Distribution of (pseudo)randomly selected kanji')
+        #self.statPlot.canvas.ax.text(max(freqs)/2, max(picked),
+                                    #"""This distribution illustrates how much times (max %d)
+                                    #kanji with different frequencies (max %d) has been picked"""
+                                    #% (max(picked), max(freqs)), bbox=dict(facecolor='blue', alpha=0.1))
+        self.canvas.ax.grid(True)
+        self.canvas.ax.fill_between(freqs, picked, 1,
+                                            facecolor='blue', alpha=0.5)
+        self.canvas.draw()
+
     ## Hides axes in widget.
     #  @param axes Widget axes form canvas.
     @staticmethod

@@ -62,6 +62,8 @@ class LabelEventFilter(QObject):
                         parent_up(object).yearLabel.setText('<b>Year:</b> ' + str(kanji.frequency) + ' | '
                                                 + str(kanji.dominance) + '%')
                     parent_up(object).kanji_tooltip(object)
+                    parent_up(object).stats.update_stat_info()
+                    parent_up(object).stats.refresh_plot()
                 except MessedUpException as e:
                     parent_up(object).show_message_then_hide(e.message)
             elif event.button() == Qt.RightButton:
@@ -281,6 +283,9 @@ class GUI(QWidget):
             self.changeDB.hide()
             self.show_message_then_hide("DB successfully remaped!", False)
             self.showDB.setText("&Change DB (active: %s)" % self.availableDB.currentText())
+
+            self.stats.update_stat_info()
+            self.stats.refresh_plot()
         except NoDbException as e:
             self.show_message_then_hide(e.message)
 
@@ -316,6 +321,9 @@ class GUI(QWidget):
             self.kanji_tooltip(self.week)
             self.kanji_tooltip(self.month)
             self.kanji_tooltip(self.year)
+
+            self.stats.update_stat_info()
+            self.stats.refresh_plot()
         except MessedUpException as e:
             self.show_message_then_hide(e.message)
 

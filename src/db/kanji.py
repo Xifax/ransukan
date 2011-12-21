@@ -31,9 +31,6 @@ class Kanji(Entity):
             kanji.picked += 1
             session.commit()
             return kanji
-            #return Kanji.get(number)
-        else:
-            return None
 
     @staticmethod
     def reset_stats():
@@ -44,3 +41,17 @@ class Kanji(Entity):
             kanji.picked = 0
         session.commit()
 
+    @staticmethod
+    def freq_stats():
+        """
+        Get picked/frequency distribution.
+        """
+        return [kanji.picked for kanji in Kanji.query.filter(Kanji.picked > 0).all()],\
+                [kanji.frequency for kanji in Kanji.query.filter(Kanji.picked > 0).all()]
+
+    @staticmethod
+    def picked_count():
+        """
+        Get number of kanji picked at least once.
+        """
+        return Kanji.query.filter(Kanji.picked > 0).count()
