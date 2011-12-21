@@ -3,12 +3,15 @@
 Defines main UI dialog.
 """
 
+# internal #
+import platform
+
 # own #
 from gui.params import KANJI, NAME, WIDTH, HEIGHT, \
                        PRETTY_FONT, KANJI_SIZE, \
                        MESSAGE_HEIGHT, MESSAGE_TIMEOUT, \
                        PROGRESS_HEIGHT, TOOLTIP_FONT_SIZE
-from pref.opt import __version__, dbs
+from pref.opt import __version__, __author__, app_name, app_about, dbs, paths
 from alg.altogether import RandomMess, MessedUpException
 from db.kanji import Kanji
 from db.jdic import JDIC
@@ -18,7 +21,7 @@ from gui.stats import StatsUI
 # external #
 from PyQt4.QtGui import QWidget, QGridLayout, \
                         QGroupBox, QLabel, QPushButton, QApplication, QFont, \
-                        QComboBox, QProgressBar, QToolTip
+                        QComboBox, QProgressBar, QToolTip, QMessageBox, QPixmap
 
 from PyQt4.QtCore import Qt, QObject, QEvent, QTimer, QThread, pyqtSignal, QSize
 
@@ -102,6 +105,7 @@ class GUI(QWidget):
         QLabel('<b>Month</b>'), QLabel('<b>Year</b>')
 
         # Main layout
+        self.showAbout = QPushButton('A&bout')
         # DB controls (top)
         self.showDB, self.availableDB, self.changeDB = \
         QPushButton('&Change DB (active:)'), QComboBox(), QPushButton('&Remap')
@@ -112,6 +116,8 @@ class GUI(QWidget):
         # Notifications
         self.progressBar = QProgressBar()
         self.statusMessage = QLabel()
+        # About
+        self.aboutBox = QMessageBox()
 
     def compose_ui(self):
         """
@@ -137,7 +143,9 @@ class GUI(QWidget):
         self.layout.addWidget(self.showStats, 3, 1)
         self.layout.addWidget(self.methodCombo, 4, 0)
         self.layout.addWidget(self.authGen, 4, 1)
-        self.layout.addWidget(self.quitApp, 5, 0, 1, 2)
+        #self.layout.addWidget(self.quitApp, 5, 0, 1, 2)
+        self.layout.addWidget(self.quitApp, 5, 0)
+        self.layout.addWidget(self.showAbout, 5, 1)
         self.layout.addWidget(self.progressBar, 6, 0, 1, 2)
         self.layout.addWidget(self.statusMessage, 7, 0, 1, 2)
 
@@ -215,6 +223,16 @@ class GUI(QWidget):
         self.availableDB.setToolTip('Available kanji frequency charts db')
         self.changeDB.setToolTip('Pick new kanji from currently selected db')
 
+        # About dialog
+        self.aboutBox.layout().itemAt(1).widget().setAlignment(Qt.AlignLeft)
+
+        self.aboutBox.setTextFormat(Qt.RichText)
+        self.aboutBox.setText('Version:\t<b>' + __version__ + '</b><br/>Python:\t<b>' + platform.python_version() + '</b>' +
+                                '<br/>Platform:\t<b>' + platform.system() + ' ' + platform.release() + '</b>' +
+                                '<br/>Author:\t<b>' + __author__ + '</b>' + app_about)
+        self.aboutBox.setWindowTitle('About ' + app_name)
+        self.aboutBox.setIconPixmap(QPixmap(paths['icon']))
+
     def init_actions(self):
         """
         Binding events/handlers.
@@ -227,6 +245,8 @@ class GUI(QWidget):
         self.authGen.clicked.connect(self.auth_task)
         self.showStats.clicked.connect(self.show_stats)
         self.methodCombo.currentIndexChanged.connect(self.update_alg)
+
+        self.showAbout.clicked.connect(self.app_help)
 
         # Mouse events for labels
         self.day.setAttribute(Qt.WA_Hover, True)
@@ -365,7 +385,7 @@ class GUI(QWidget):
         pass
 
     def app_help(self):
-        pass
+        self.aboutBox.show()
 
         #### Utility events ####
 
@@ -402,3 +422,22 @@ class AuthorizationTask(QThread):
             pass
 
         self.done.emit(self.success)
+
+class RandomNumberTask(QThread):
+    """
+    Get random number from one of the RNG services.
+    """
+    number = pyqtSignal(int)
+
+    def __init__(self, al, praent=None):
+        super(RandomNumberTask, self).__init__(parent)
+        self.al = al
+        self.result = None
+
+    def run(self):
+        try:
+            self.result = self.al.random_int()
+        except Exception as e:
+            pass
+
+        self.done.emit(self.result)

@@ -7,7 +7,32 @@ Should be imported only when those are required.
 __author__ 	= "Artiom Basenko"
 __license__ = "GPL"
 __status__ 	= "Development"
-__version__ = "0.4"
+__version__ = "0.5"
+
+app_name = u'乱数漢 ~ransukan~'
+
+app_about = u"""<hr/>Simple tool to try out different selection algorithms.<br/>
+Kanji frequency distribution (japanese) is used as primary data source.<br/>
+Resources info:
+    <ul>
+    <li>KANJIDIC2 includes only 2500+ frequency ranked kanji (total 13k+)</li>
+    <li>Project kanji db is based on most complete frequency list (20k+), courtesy of foosoft.net</li>
+    <li>The following randomizers are used:</li>
+        <ul>
+            <li>Quantum Random Bit Generator Service</li>
+            <li>QRNG</li>
+            <li>RANDOM.ORG</li>
+            <li>NumPy</li>
+        </ul>
+    </ul>
+<hr/>
+Selected kanji info represents:
+<ul>
+<li>frequency rank (higher - more frequent)</li>
+<li>lexical dominance in %</li>
+<ul>
+        """
+
 
 # Web resources
 # todo: add the other
@@ -36,6 +61,7 @@ paths = {'res' 			: '../res',
 		 'freq_db' 		: '../res/freq.db',
 		 'kanjidic' 	: '../res/kanjidic2.dblite',
          'fonts'        : '../res/fonts',
+         'icon'         : '../res/icon.png',
 		 }
 
 # Libs to use
