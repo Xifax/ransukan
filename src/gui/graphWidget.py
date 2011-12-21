@@ -114,7 +114,7 @@ class MplWidget(QtGui.QWidget):
             #self.toolbar.addAction(self.toggleLegendAction)
 
         # context menu
-        self.addAction(self.toggleLegendAction)
+        #self.addAction(self.toggleLegendAction)
         #self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + COPY),'Copy data to table',
                                      #self, triggered=self.toTable))
         #self.addAction(QtGui.QAction(QtGui.QIcon(RES + ICONS + GRAPH),'Plot data in tools',

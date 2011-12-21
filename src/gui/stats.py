@@ -5,7 +5,7 @@ Kanji selection statistics UI dialog.
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QWidget, QGridLayout, QPushButton, QLabel
 
-#from graphWidget import MplWidget
+from graphWidget import MplWidget
 
 class StatsUI(QWidget):
     def __init__(self, parent=None):
@@ -20,8 +20,8 @@ class StatsUI(QWidget):
     def create_ui_components(self):
         self.layout = QGridLayout()
 
-        self.statPlot = QLabel("Here be matplotlib widget, Y: picked | X: frequency (least to most)")
-        #self.statPlot = MplWidget()
+        #self.statPlot = QLabel("Here be matplotlib widget, Y: picked | X: frequency (least to most)")
+        self.statPlot = MplWidget()
         self.refreshPlot, self.runTest, self.clearStats, self.switchFreqDom = \
         QPushButton('&Refresh'), QPushButton('&Test'), QPushButton('&Clear'), QPushButton('&Switch')
 
