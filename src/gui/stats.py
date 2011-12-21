@@ -145,6 +145,8 @@ Max frequency: <b>%d</b> | Picked at least once: <b>%d</b>" %
             self.beginTest.setEnabled(True)
             self.testProgress.setValue(0)
 
+            print self.al.ex_stats()
+
     def progress_test(self, partDone):
         self.testProgress.setValue(partDone)
         #self.update_stat_info()

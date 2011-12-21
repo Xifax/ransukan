@@ -3,6 +3,7 @@
 Aggregator for all the RNG algorithms.
 Should be used instead of directly calling submodules lke qrbg and qrng.
 """
+from time import time
 
 from alg.qrbg import qrbg
 from alg.qrng import QuantumRNG
@@ -21,6 +22,10 @@ class RandomMess:
         self.qrng = None
         self.active = next(self.algs.itervalues())
 
+        # Behold! Stats!
+        self.generations = 0
+        self.total_time_s = 0.0
+
     def auth(self):
         self.qrbg = qrbg(auth['qrbg']['login'], auth['qrbg']['pass'])
         self.qrng = QuantumRNG()
@@ -33,9 +38,13 @@ class RandomMess:
         pass
 
     def random_int(self):
+        self.measure()
+
         result = self.algs[self.active](self)
         if result is None:
             raise MessedUpException("Could not get random number!")
+
+        self.measure(end=True)
         return abs(result)
 
     def random_float(self):
@@ -71,3 +80,18 @@ class RandomMess:
             #'GNU Scientific Library'          : random_gsl,
             'Numpy random sampling'           : random_numpy,
             }
+
+    # Utility methods #
+
+    def measure(self, end=False):
+        if not end:
+            self.start_time = time()
+        else:
+            passed = time() - self.start_time
+            self.generations += 1
+            self.total_time_s += passed
+            print passed
+
+    def ex_stats(self):
+        return "[RNG perfomance] Total generations: %d | total time: %f (sec)" \
+                % (self.generations, self.total_time_s)
