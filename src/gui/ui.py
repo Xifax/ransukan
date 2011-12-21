@@ -23,6 +23,9 @@ from PyQt4.QtGui import QWidget, QGridLayout, \
 from PyQt4.QtCore import Qt, QObject, QEvent, QTimer, QThread, pyqtSignal, QSize
 
 def parent_up(object):
+    """
+    Get top parent for child object in case of event handling.
+    """
     if isinstance(object, QObject):
         return object.parent().parent()
 
@@ -44,16 +47,16 @@ class LabelEventFilter(QObject):
                         kanji = Kanji.get_random(parent_up(object).al.random_int())
                     object.setText(kanji.character)
                     if object is parent_up(object).day:
-                        parent_up(object).dayLabel.setText('Day: ' + str(kanji.frequency) + ' | '
+                        parent_up(object).dayLabel.setText('<b>Day:</b> ' + str(kanji.frequency) + ' | '
                                                 + str(kanji.dominance) + '%')
                     elif object is parent_up(object).week:
-                        parent_up(object).weekLabel.setText('Week: ' + str(kanji.frequency) + ' | '
+                        parent_up(object).weekLabel.setText('<b>Week:</b> ' + str(kanji.frequency) + ' | '
                                                 + str(kanji.dominance) + '%')
                     elif object is parent_up(object).month:
-                        parent_up(object).monthLabel.setText('Month: ' + str(kanji.frequency) + ' | '
+                        parent_up(object).monthLabel.setText('<b>Month:</b> ' + str(kanji.frequency) + ' | '
                                                 + str(kanji.dominance) + '%')
                     elif object is parent_up(object).year:
-                        parent_up(object).yearLabel.setText('Year: ' + str(kanji.frequency) + ' | '
+                        parent_up(object).yearLabel.setText('<b>Year:</b> ' + str(kanji.frequency) + ' | '
                                                 + str(kanji.dominance) + '%')
                     parent_up(object).kanji_tooltip(object)
                 except MessedUpException as e:
@@ -71,22 +74,49 @@ class GUI(QWidget):
     def __init__(self, parent=None):
         super(GUI, self).__init__(parent)
 
+        self.create_ui_components()
+        self.compose_ui()
+
+        # Initializing: window composition, it's contents and event handlers
+        self.init_composition()
+        self.init_contents()
+        self.init_actions()
+
+        self.on_start()
+
+    def create_ui_components(self):
+        """
+        Create layouts and qt controls.
+        """
         self.layout = QGridLayout()
 
         self.kanjiGroup = QGroupBox()
         self.kanjiLayout = QGridLayout()
 
         # Kanji ui group
-        self.day = QLabel(KANJI)
-        self.week = QLabel(KANJI)
-        self.month = QLabel(KANJI)
-        self.year = QLabel(KANJI)
+        self.day, self.week, self.month, self.year = \
+        QLabel(KANJI), QLabel(KANJI), QLabel(KANJI), QLabel(KANJI)
 
-        self.dayLabel = QLabel('Day')
-        self.weekLabel = QLabel('Week')
-        self.monthLabel = QLabel('Month')
-        self.yearLabel = QLabel('Year')
+        self.dayLabel, self.weekLabel, self.monthLabel, self.yearLabel = \
+        QLabel('<b>Day</b>'), QLabel('<b>Week</b>'), \
+        QLabel('<b>Month</b>'), QLabel('<b>Year</b>')
 
+        # Main layout
+        # DB controls (top)
+        self.showDB, self.availableDB, self.changeDB = \
+        QPushButton('&Change DB (active:)'), QComboBox(), QPushButton('&Remap')
+        # General controls (bottom)
+        self.getAll, self.showStats, self.quitApp, self.authGen, self.methodCombo = \
+        QPushButton('&Get all'), QPushButton('&Stats'), QPushButton('&Quit'), \
+        QPushButton('&Auth'), QComboBox()
+        # Notifications
+        self.progressBar = QProgressBar()
+        self.statusMessage = QLabel()
+
+    def compose_ui(self):
+        """
+        Fill layouts and groups, initialize filters.
+        """
         self.kanjiLayout.addWidget(self.day, 0, 0)
         self.kanjiLayout.addWidget(self.week, 0, 1)
         self.kanjiLayout.addWidget(self.dayLabel, 1, 0)
@@ -99,20 +129,6 @@ class GUI(QWidget):
 
         self.kanjiGroup.setLayout(self.kanjiLayout)
 
-        # Main layout
-        # DB controls (top)
-        self.showDB = QPushButton('&Change DB (active:)')
-        self.availableDB = QComboBox()
-        self.changeDB = QPushButton('&Remap')
-        # General controls (bottom)
-        self.getAll = QPushButton('&Get all')
-        self.showStats = QPushButton('&Stats')
-        self.quitApp = QPushButton('&Quit')
-        self.authGen = QPushButton('&Auth')
-        self.methodCombo = QComboBox()
-        # Notifications
-        self.progressBar = QProgressBar()
-        self.statusMessage = QLabel()
         self.layout.addWidget(self.showDB, 0, 0, 1, 2)
         self.layout.addWidget(self.availableDB, 1, 0)
         self.layout.addWidget(self.changeDB, 1, 1)
@@ -129,11 +145,10 @@ class GUI(QWidget):
 
         self.eFilter = LabelEventFilter()
 
-        # Initializing: window composition, it's contents and event handlers
-        self.init_composition()
-        self.init_contents()
-        self.init_actions()
-
+    def on_start(self):
+        """
+        Additional procedures run on application start.
+        """
         # Let's initialize even some stuff!
         self.stats = StatsUI(self)
         self.al = None
@@ -143,12 +158,18 @@ class GUI(QWidget):
         self.showDB.setText("&Change DB (active: %s)" % self.availableDB.currentText())
 
     def init_composition(self):
+        """
+        Window composition and general params.
+        """
         self.setWindowTitle(NAME + ' ' + __version__)
         desktop = QApplication.desktop()
         self.setGeometry((desktop.width() - WIDTH)/2,
                         (desktop.height() - HEIGHT)/2, WIDTH, HEIGHT)
 
     def init_contents(self):
+        """
+        Setting up qt controls.
+        """
         self.changeDB.hide()
         self.availableDB.hide()
         self.availableDB.addItems(dbs.keys())
@@ -185,7 +206,19 @@ class GUI(QWidget):
 
         QToolTip.setFont(QFont(PRETTY_FONT, TOOLTIP_FONT_SIZE))
 
+        self.getAll.setToolTip('Randomly select all 4 kanji')
+        self.methodCombo.setToolTip('Choose algorithm for randomness')
+        self.authGen.setToolTip('Authorize on remote RNG services')
+        self.showStats.setToolTip('Show/hide dialog with comprehensive statistics')
+        self.quitApp.setToolTip('Close application')
+        self.showDB.setToolTip('Show/hide available databases')
+        self.availableDB.setToolTip('Available kanji frequency charts db')
+        self.changeDB.setToolTip('Pick new kanji from currently selected db')
+
     def init_actions(self):
+        """
+        Binding events/handlers.
+        """
         self.showDB.clicked.connect(self.show_available_db)
         self.changeDB.clicked.connect(self.change_db)
 
@@ -204,6 +237,8 @@ class GUI(QWidget):
         self.week.installEventFilter(self.eFilter)
         self.month.installEventFilter(self.eFilter)
         self.year.installEventFilter(self.eFilter)
+
+    ##### actions #####
 
     def show_stats(self):
         if self.stats.isVisible():
@@ -245,16 +280,16 @@ class GUI(QWidget):
             for_a_year = kanji_set.pop()
 
             self.day.setText(for_a_day.character)
-            self.dayLabel.setText('Day: ' + str(for_a_day.frequency) + ' | '
+            self.dayLabel.setText('<b>Day:</b> ' + str(for_a_day.frequency) + ' | '
                                         + str(for_a_day.dominance) + '%')
             self.week.setText(for_a_week.character)
-            self.weekLabel.setText('Week: ' + str(for_a_week.frequency) + ' | '
+            self.weekLabel.setText('<b>Week:</b> ' + str(for_a_week.frequency) + ' | '
                                         + str(for_a_week.dominance) + '%')
             self.month.setText(for_a_month.character)
-            self.monthLabel.setText('Month: ' + str(for_a_month.frequency) + ' | '
+            self.monthLabel.setText('<b>Month:</b> ' + str(for_a_month.frequency) + ' | '
                                         + str(for_a_month.dominance) + '%')
             self.year.setText(for_a_year.character)
-            self.yearLabel.setText('Year: ' + str(for_a_year.frequency) + ' | '
+            self.yearLabel.setText('<b>Year:</b> ' + str(for_a_year.frequency) + ' | '
                                         + str(for_a_year.dominance) + '%')
 
             self.kanji_tooltip(self.day)
@@ -278,7 +313,7 @@ class GUI(QWidget):
         self.auth_thread = AuthorizationTask(self.al)
         self.auth_thread.done.connect(self.auth_complete)
         #self.auth_thread.run()
-        # IT DOESN't work on windows!
+        # IT DOESN't work on windows as it should!
         self.auth_thread.start()
         self.show_progress('Authorizing on RNG services...')
 
@@ -329,6 +364,9 @@ class GUI(QWidget):
     def kanji_info(self, kanji):
         pass
 
+    def app_help(self):
+        pass
+
         #### Utility events ####
 
     def resizeEvent(self, QResizeEvent):
@@ -346,6 +384,9 @@ class GUI(QWidget):
         self.stats.resize(QSize(self.stats.width(), self.height()))
 
 class AuthorizationTask(QThread):
+    """
+    Remote RNG authorization task, run in separate thread.
+    """
     done = pyqtSignal(bool)
 
     def __init__(self, al, parent=None):
@@ -358,7 +399,6 @@ class AuthorizationTask(QThread):
             self.al.auth()
             self.success = True
         except Exception as e:
-#            print e.message
             pass
 
         self.done.emit(self.success)

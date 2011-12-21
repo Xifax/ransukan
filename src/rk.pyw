@@ -15,7 +15,7 @@ from db.store import init_db
 
 def main():
     app = QApplication(sys.argv)
-
+    #app.setIcon(QPixmap())
     init_db()
 
     gui = GUI()
