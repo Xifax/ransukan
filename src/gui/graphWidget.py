@@ -6,7 +6,7 @@ Created on Mar 10, 2011
 
 # internal #
 import os
-import Image
+#import Image
 
 # own #
 #from utility.const import RES, ICONS, TOOLBAR_ICONS,\
