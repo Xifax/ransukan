@@ -2,12 +2,13 @@
 """
 Kanji selection statistics UI dialog.
 """
+# std #
+from time import time
 
 # external #
 from PyQt4.QtCore import Qt, QThread, pyqtSignal
 from PyQt4.QtGui import QWidget, QGridLayout, QPushButton, \
                         QLabel, QProgressBar, QSpinBox
-#import numpy as np
 
 # own #
 from graphWidget import MplWidget
@@ -75,6 +76,9 @@ n_picked(frequency) or n_picked(dominance)')
         self.targetMaxPicked.setToolTip('Target average times picked: if > 1, \
 will prefer this param over total number of tests')
 
+        self.statInfo.setAlignment(Qt.AlignCenter)
+        self.testProgress.setValue(0)
+
     def init_actions(self):
         self.refreshPlot.clicked.connect(self.refresh_plot)
         self.clearStats.clicked.connect(self.reset_stats)
@@ -86,6 +90,10 @@ will prefer this param over total number of tests')
     ##### actions #####
 
     def refresh_plot(self):
+        """
+        Update plot with data from DB.
+        Note: very time consuming.
+        """
         #todo: how about 2d/3d contour, eh?
         self.statPlot.kanjiStats(Kanji.freq_stats())
         self.update_stat_info()
@@ -107,6 +115,7 @@ will prefer this param over total number of tests')
     def reset_stats(self):
         Kanji.reset_stats()
         self.refresh_plot()
+        self.update_stat_info()
 
     def switch_freq_dom(self):
         pass
@@ -116,6 +125,10 @@ will prefer this param over total number of tests')
         self.show()
 
     def update_stat_info(self):
+        """
+        Update statistics for active DB.
+        Note: very time consuming.
+        """
         try:
             count, (picked, freqs), picked_count = \
                 Kanji.query.count(), Kanji.freq_stats(), Kanji.picked_count()
@@ -135,7 +148,6 @@ Max frequency: <b>%d</b> | Picked at least once: <b>%d</b>" %
         self.testProgress.show()
         self.test_thread.start()
         self.beginTest.setEnabled(False)
-        #self.show_progress('Authorizing on RNG services...')
 
     def end_test(self, over):
         if over:
@@ -166,14 +178,31 @@ class BatchTestTask(QThread):
 
     def run(self):
         try:
-            for test in range(1, self.limit):
-                kanji_set = []
-                while len(kanji_set) != 4:
-                    kanji = Kanji.get_random(self.al.random_int())
-                    if kanji is not None:
-                        if kanji not in kanji_set:
-                            kanji_set.append(kanji)
-                self.partDone.emit(float(test)/self.limit * 100)
+            if self.rank == 1:
+                for test in range(1, self.limit):
+                    began = time()
+                    kanji_set = []
+                    while len(kanji_set) != 4:
+                        kanji = Kanji.get_random(self.al.random_int())
+                        if kanji is not None:
+                            if kanji not in kanji_set:
+                                kanji_set.append(kanji)
+                    print 'Quadruple selected: ' + str(time() - began)
+                    self.partDone.emit(float(test)/self.limit * 100)
+            else:
+                counter = 0.0
+                while Kanji.picked_max() < self.rank:
+                    began = time()
+                    kanji_set = []
+                    while len(kanji_set) != 4:
+                        kanji = Kanji.get_random(self.al.random_int())
+                        if kanji is not None:
+                            if kanji not in kanji_set:
+                                kanji_set.append(kanji)
+                    print 'Quadruple selected: ' + str(time() - began)
+                    counter += 0.0001
+                    self.partDone.emit(float(counter) * 100)
+
         except Exception as e:
             print e.message
 

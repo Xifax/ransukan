@@ -7,6 +7,7 @@ from time import time
 
 from alg.qrbg import qrbg
 from alg.qrng import QuantumRNG
+from randomdotorg import RandomDotOrg
 import numpy as np
 
 from pref.opt import auth
@@ -16,6 +17,9 @@ class MessedUpException(Exception):
     pass
 
 class RandomMess:
+
+    begin = 1
+    end = 21000
 
     def __init__(self):
         self.qrbg = None
@@ -47,26 +51,36 @@ class RandomMess:
         self.measure(end=True)
         return abs(result)
 
+    def random_range(self, begin=begin, end=end):
+        self.measure()
+
+        result = self.algs[self.active](self, begin, end)
+        if result is None:
+            raise MessedUpException("Could not get random number!")
+
+        self.measure(end=True)
+        return result
+
     def random_float(self):
-        return abs(self.algs[self.active](self, True))
+        return abs(self.algs[self.active](self, floating=True))
 
     # Sub-methods #
 
     def random_numpy(self, floating = False):
         return np.random.randint(1, Kanji.query.count())
 
-    def random_gsl(self, floating = False):
+    def random_gsl(self, begin=begin, end=end, floating = False):
         pass
 
-    def random_org(self, floating = False):
-        pass
+    def random_org(self, begin=begin, end=end, floating = False):
+        return RandomDotOrg().randint(begin, end)
 
-    def random_qrBitG(self, floating = False):
+    def random_qrBitG(self, begin=begin, end=end, floating = False):
         if self.qrbg is None:
             raise MessedUpException("Not authorized on QR-BIT-G service!")
         return self.qrbg.getShort()
 
-    def random_qrNumberG(self, floating = False):
+    def random_qrNumberG(self, begin=begin, end=end, floating = False):
         if self.qrng is None or not self.qrng.active():
             raise MessedUpException("Not authorized on QR-NUMBER-G service!")
         result = self.qrng.getInt()

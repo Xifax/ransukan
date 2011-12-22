@@ -10,7 +10,8 @@ import platform
 from gui.params import KANJI, NAME, WIDTH, HEIGHT, \
                        PRETTY_FONT, KANJI_SIZE, \
                        MESSAGE_HEIGHT, MESSAGE_TIMEOUT, \
-                       PROGRESS_HEIGHT, TOOLTIP_FONT_SIZE
+                       PROGRESS_HEIGHT, TOOLTIP_FONT_SIZE, \
+                       WARNING_STYLE, NOTE_STYLE
 from pref.opt import __version__, __author__, app_name, app_about, dbs, paths
 from alg.altogether import RandomMess, MessedUpException
 from db.kanji import Kanji
@@ -209,8 +210,7 @@ class GUI(QWidget):
         self.statusMessage.setAlignment(Qt.AlignCenter)
         self.statusMessage.hide()
         self.statusMessage.setMaximumHeight(MESSAGE_HEIGHT)
-        self.statusMessage.setStyleSheet("QLabel { color: rgb(255, 69, 0); background-color: transparent;  \
-                                                   border: 1px solid gray; border-radius: 3px; }")
+        self.statusMessage.setStyleSheet(WARNING_STYLE)
 
         self.progressBar.setMaximum(0)
         self.progressBar.setMaximumHeight(PROGRESS_HEIGHT)
@@ -292,15 +292,14 @@ class GUI(QWidget):
             self.show_message_then_hide(e.message)
 
     def get_all(self):
-        try:
-            kanji_set = []
-            while len(kanji_set) != 4:
-                kanji = Kanji.get_random(self.al.random_int())
-                if kanji is not None:
-                    # Should not get the same kanji in one set
-                    if kanji not in kanji_set:
-                        kanji_set.append(kanji)
+        self.random_kanji_task = RandomKanjiTask(self.al)
+        self.random_kanji_task.done.connect(self.update_kanji)
+        self.show_progress('Selecting kanji...')
+        self.random_kanji_task.start()
 
+    def update_kanji(self, results):
+        if results['success']:
+            kanji_set = results['kanji_set']
             for_a_day = kanji_set.pop()
             for_a_week = kanji_set.pop()
             for_a_month = kanji_set.pop()
@@ -324,10 +323,15 @@ class GUI(QWidget):
             self.kanji_tooltip(self.month)
             self.kanji_tooltip(self.year)
 
-            self.stats.update_stat_info()
-            self.stats.refresh_plot()
-        except MessedUpException as e:
-            self.show_message_then_hide(e.message)
+            if self.stats.isVisible():
+                self.stats.update_stat_info()
+                self.stats.refresh_plot()
+
+            self.hide_message()
+        else:
+            self.show_message_then_hide(results['message'])
+
+        self.hide_progress()
 
     def pretty_font(self):
         pass
@@ -357,19 +361,16 @@ class GUI(QWidget):
 
     def show_message_then_hide(self, message, error=True):
         if error:
-            self.statusMessage.setStyleSheet("QLabel { color: rgb(255, 69, 0); background-color: transparent; \
-                                                       border: 1px solid gray; border-radius: 3px; }")
+            self.statusMessage.setStyleSheet(WARNING_STYLE)
         else:
-            self.statusMessage.setStyleSheet("QLabel { color: rgb(50, 205, 50); background-color: transparent; \
-                                                       border: 1px solid gray; border-radius: 3px; }")
+            self.statusMessage.setStyleSheet(NOTE_STYLE)
 
         self.statusMessage.setText(message)
         self.statusMessage.show()
         QTimer.singleShot(MESSAGE_TIMEOUT, self.hide_message)
 
     def show_progress(self, message):
-        self.statusMessage.setStyleSheet("QLabel { color: rgb(50, 205, 50); background-color: transparent; \
-                                                       border: 1px solid gray; border-radius: 3px; }")
+        self.statusMessage.setStyleSheet(NOTE_STYLE)
         self.statusMessage.setText(message)
         self.statusMessage.show()
         self.progressBar.show()
@@ -437,7 +438,7 @@ class RandomNumberTask(QThread):
     """
     Get random number from one of the RNG services.
     """
-    number = pyqtSignal(int)
+    done = pyqtSignal(int)
 
     def __init__(self, al, parent=None):
         super(RandomNumberTask, self).__init__(parent)
@@ -451,3 +452,30 @@ class RandomNumberTask(QThread):
             pass
 
         self.done.emit(self.result)
+
+class RandomKanjiTask(QThread):
+    """
+    Get random number from one of the RNG services.
+    """
+    done = pyqtSignal(dict)
+
+    def __init__(self, al, parent=None):
+        super(RandomKanjiTask, self).__init__(parent)
+        self.al = al
+        self.results = dict(kanji_set=[], success=False, message='')
+
+    def run(self):
+        try:
+            kanji_set = []
+            while len(kanji_set) != 4:
+                kanji = Kanji.get_random(self.al.random_int())
+                if kanji is not None:
+                    # Should not get the same kanji in one set
+                    if kanji not in kanji_set:
+                        kanji_set.append(kanji)
+            self.results['kanji_set'] = kanji_set
+            self.results['success'] = True
+        except MessedUpException as e:
+            self.results['message'] = e.message
+
+        self.done.emit(self.results)

@@ -7,7 +7,7 @@ Should be imported only when those are required.
 __author__ 	= "Artiom Basenko"
 __license__ = "GPL"
 __status__ 	= "Development"
-__version__ = "0.7"
+__version__ = "0.8"
 
 app_name = u'乱数漢 ~ransukan~'
 
@@ -90,4 +90,4 @@ db_for_freq = {'frequency20k'  : '../res/freq20k.db',
               }
 
 # Packages to install
-packages = ['sqlalchemy', 'elixir', 'BeautifulSoup', 'numpy', 'matplotlib', 'PyQt4']
+packages = ['sqlalchemy', 'elixir', 'BeautifulSoup', 'numpy', 'matplotlib', 'PyQt4', 'randomdotorg']

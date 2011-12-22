@@ -26,6 +26,7 @@ class Kanji(Entity):
         Get random kanji and increment it's stats.
         If provided number exceeds available kanji rank: will return None.
         """
+        # todo: should optimize
         if number <= Kanji.query.count():
             kanji = Kanji.get(number)
             kanji.picked += 1
@@ -55,3 +56,10 @@ class Kanji(Entity):
         Get number of kanji picked at least once.
         """
         return Kanji.query.filter(Kanji.picked > 0).count()
+
+    @staticmethod
+    def picked_max():
+        """
+        Get maximum picked stat for all kanji in db.
+        """
+        return max([kanji.picked for kanji in Kanji.query.filter(Kanji.picked > 0).all()])

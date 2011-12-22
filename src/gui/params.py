@@ -15,6 +15,10 @@ PRETTY_FONT = u'A-OTF Ryumin Pr5'
 #PRETTY_FONT = u'Monospace'
 MESSAGE_HEIGHT = 30
 MESSAGE_TIMEOUT = 4000
-PROGRESS_HEIGHT = 20
+PROGRESS_HEIGHT = 10
 TOOLTIP_FONT_SIZE = 16
 PLOT_WIDTH = 500
+WARNING_STYLE = "QLabel { color: rgb(255, 69, 0); background-color: transparent; \
+                                                       border: 1px solid gray; border-radius: 3px; }"
+NOTE_STYLE = "QLabel { color: rgb(34, 139, 34); background-color: transparent; \
+                                                       border: 1px solid gray; border-radius: 3px; }"
